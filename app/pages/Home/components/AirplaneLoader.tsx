@@ -73,6 +73,8 @@ export const AirplaneLoader = () => {
 					<img
 						src="/icons/airplane_icon.svg"
 						alt="airplane icon"
+						fetchPriority="high"
+						loading="eager"
 						style={{
 							width: "80px",
 							height: "80px",

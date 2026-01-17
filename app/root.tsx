@@ -32,6 +32,13 @@ export const links: Route.LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
   },
+  {
+    rel: "preload",
+    href: "/icons/airplane_icon.svg",
+    as: "image",
+    type: "image/svg+xml",
+    fetchPriority: "high",
+  },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
