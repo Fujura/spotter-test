@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Box } from "@mui/material";
 import { Route } from "../../+types/root";
-import dayjs, { Dayjs } from "dayjs";
-import { FlightSearchForm } from "./components/FlightSearchForm";
+import { FlightSearchForm, type FormState } from "./components/FlightSearchForm";
 import { AirplaneLoader } from "./components/AirplaneLoader";
 import { FlightResults } from "./components/FlightResults";
 import { useAirportSearch } from "./components/hooks/useAirportSearch";
@@ -16,28 +15,30 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-	const [roundTrip, setRoundTrip] = useState("round");
-	const [usersCount, setUsersCount] = useState("1");
-	const [ticketType, setTicketType] = useState("economy");
-	const [whereFrom, setWhereFrom] = useState("");
-	const [whereTo, setWhereTo] = useState("");
-	const [departureDate, setDepartureDate] = useState<Dayjs | null>(null);
-	const [returnDate, setReturnDate] = useState<Dayjs | null>(null);
+	const [formState, setFormState] = useState<FormState>({
+		roundTrip: "round",
+		usersCount: "1",
+		ticketType: "economy",
+		whereFrom: "",
+		whereTo: "",
+		departureDate: null,
+		returnDate: null,
+	});
 
-	const { airports: fromAirports, loading: loadingFrom } = useAirportSearch(whereFrom);
-	const { airports: toAirports, loading: loadingTo } = useAirportSearch(whereTo);
+	const { airports: fromAirports, loading: loadingFrom } = useAirportSearch(formState.whereFrom);
+	const { airports: toAirports, loading: loadingTo } = useAirportSearch(formState.whereTo);
 
 	const flightSearch = useFlightSearch();
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
-		if (!whereFrom || !whereTo || !departureDate) {
+		if (!formState.whereFrom || !formState.whereTo || !formState.departureDate) {
 			alert("Please fill in all required fields");
 			return;
 		}
 
-		if (whereFrom.length !== 3 || whereTo.length !== 3) {
+		if (formState.whereFrom.length !== 3 || formState.whereTo.length !== 3) {
 			alert(
 				"Please enter valid 3-letter IATA airport codes (e.g., NYC, LON, PAR)"
 			);
@@ -45,11 +46,11 @@ export default function Home() {
 		}
 
 		const params = {
-			from: whereFrom.toUpperCase(),
-			to: whereTo.toUpperCase(),
-			departure: departureDate.format("YYYY-MM-DD"),
-			adults: usersCount,
-			return: roundTrip === "round" && returnDate ? returnDate.format("YYYY-MM-DD") : undefined,
+			from: formState.whereFrom.toUpperCase(),
+			to: formState.whereTo.toUpperCase(),
+			departure: formState.departureDate.format("YYYY-MM-DD"),
+			adults: formState.usersCount,
+			return: formState.roundTrip === "round" && formState.returnDate ? formState.returnDate.format("YYYY-MM-DD") : undefined,
 		};
 
 		flightSearch.mutate(params, {
@@ -92,25 +93,13 @@ export default function Home() {
 				</Box>
 			) : (
 				<FlightSearchForm
-					roundTrip={roundTrip}
-					usersCount={usersCount}
-					ticketType={ticketType}
-					whereFrom={whereFrom}
-					whereTo={whereTo}
-					departureDate={departureDate}
-					returnDate={returnDate}
+					formState={formState}
+					onFormStateChange={setFormState}
 					fromAirports={fromAirports}
 					toAirports={toAirports}
 					loadingFrom={loadingFrom}
 					loadingTo={loadingTo}
 					loadingFlights={loadingFlights}
-					onRoundTripChange={setRoundTrip}
-					onUsersCountChange={setUsersCount}
-					onTicketTypeChange={setTicketType}
-					onWhereFromChange={setWhereFrom}
-					onWhereToChange={setWhereTo}
-					onDepartureDateChange={setDepartureDate}
-					onReturnDateChange={setReturnDate}
 					onSubmit={handleSubmit}
 				/>
 			)}

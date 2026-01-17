@@ -1,6 +1,7 @@
 import { Box, Paper } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { Dayjs } from "dayjs";
 import {
 	RoundTripSelect,
 	UsersCountSelect,
@@ -10,51 +11,40 @@ import {
 	SearchButton,
 } from "./form";
 
-interface FlightSearchFormProps {
+export interface FormState {
 	roundTrip: string;
 	usersCount: string;
 	ticketType: string;
 	whereFrom: string;
 	whereTo: string;
-	departureDate: any;
-	returnDate: any;
+	departureDate: Dayjs | null;
+	returnDate: Dayjs | null;
+}
+
+interface FlightSearchFormProps {
+	formState: FormState;
+	onFormStateChange: (state: FormState | ((prev: FormState) => FormState)) => void;
 	fromAirports: any[];
 	toAirports: any[];
 	loadingFrom: boolean;
 	loadingTo: boolean;
 	loadingFlights: boolean;
-	onRoundTripChange: (value: string) => void;
-	onUsersCountChange: (value: string) => void;
-	onTicketTypeChange: (value: string) => void;
-	onWhereFromChange: (value: string) => void;
-	onWhereToChange: (value: string) => void;
-	onDepartureDateChange: (value: any) => void;
-	onReturnDateChange: (value: any) => void;
 	onSubmit: (e: React.FormEvent) => void;
 }
 
 export const FlightSearchForm = ({
-	roundTrip,
-	usersCount,
-	ticketType,
-	whereFrom,
-	whereTo,
-	departureDate,
-	returnDate,
+	formState,
+	onFormStateChange,
 	fromAirports,
 	toAirports,
 	loadingFrom,
 	loadingTo,
 	loadingFlights,
-	onRoundTripChange,
-	onUsersCountChange,
-	onTicketTypeChange,
-	onWhereFromChange,
-	onWhereToChange,
-	onDepartureDateChange,
-	onReturnDateChange,
 	onSubmit,
 }: FlightSearchFormProps) => {
+	const updateField = <K extends keyof FormState>(field: K, value: FormState[K]) => {
+		onFormStateChange((prev) => ({ ...prev, [field]: value }));
+	};
 	return (
 		<LocalizationProvider dateAdapter={AdapterDayjs}>
 			<Box
@@ -103,7 +93,7 @@ export const FlightSearchForm = ({
 									},
 								}}
 							>
-								<RoundTripSelect value={roundTrip} onChange={onRoundTripChange} />
+								<RoundTripSelect value={formState.roundTrip} onChange={(value) => updateField("roundTrip", value)} />
 							</Box>
 
 							<Box
@@ -115,7 +105,7 @@ export const FlightSearchForm = ({
 									},
 								}}
 							>
-								<UsersCountSelect value={usersCount} onChange={onUsersCountChange} />
+								<UsersCountSelect value={formState.usersCount} onChange={(value) => updateField("usersCount", value)} />
 							</Box>
 
 							<Box
@@ -127,7 +117,7 @@ export const FlightSearchForm = ({
 									},
 								}}
 							>
-								<TicketTypeSelect value={ticketType} onChange={onTicketTypeChange} />
+								<TicketTypeSelect value={formState.ticketType} onChange={(value) => updateField("ticketType", value)} />
 							</Box>
 						</Box>
 
@@ -141,27 +131,27 @@ export const FlightSearchForm = ({
 							<Box
 								sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 12px)" } }}
 							>
-								<AirportAutocomplete
-									label="Where From"
-									value={whereFrom}
-									options={fromAirports}
-									loading={loadingFrom}
-									onInputChange={onWhereFromChange}
-									onChange={onWhereFromChange}
-								/>
+							<AirportAutocomplete
+								label="Where From"
+								value={formState.whereFrom}
+								options={fromAirports}
+								loading={loadingFrom}
+								onInputChange={(value) => updateField("whereFrom", value)}
+								onChange={(value) => updateField("whereFrom", value)}
+							/>
 							</Box>
 
 							<Box
 								sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 12px)" } }}
 							>
-								<AirportAutocomplete
-									label="Where To"
-									value={whereTo}
-									options={toAirports}
-									loading={loadingTo}
-									onInputChange={onWhereToChange}
-									onChange={onWhereToChange}
-								/>
+							<AirportAutocomplete
+								label="Where To"
+								value={formState.whereTo}
+								options={toAirports}
+								loading={loadingTo}
+								onInputChange={(value) => updateField("whereTo", value)}
+								onChange={(value) => updateField("whereTo", value)}
+							/>
 							</Box>
 						</Box>
 
@@ -175,22 +165,22 @@ export const FlightSearchForm = ({
 							<Box
 								sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 12px)" } }}
 							>
-								<FlightDatePicker
-									label="Departure Date"
-									value={departureDate}
-									onChange={onDepartureDateChange}
-								/>
+							<FlightDatePicker
+								label="Departure Date"
+								value={formState.departureDate}
+								onChange={(value) => updateField("departureDate", value)}
+							/>
 							</Box>
 
 							<Box
 								sx={{ flex: { xs: "1 1 100%", sm: "1 1 calc(50% - 12px)" } }}
 							>
-								<FlightDatePicker
-									label="Return Date"
-									value={returnDate}
-									onChange={onReturnDateChange}
-									minDate={departureDate}
-								/>
+							<FlightDatePicker
+								label="Return Date"
+								value={formState.returnDate}
+								onChange={(value) => updateField("returnDate", value)}
+								minDate={formState.departureDate}
+							/>
 							</Box>
 						</Box>
 
