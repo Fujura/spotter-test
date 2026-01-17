@@ -6,9 +6,20 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 import type { Route } from "./+types/root";
 import "./app.css";
+
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			staleTime: 5 * 60 * 1000,
+			cacheTime: 10 * 60 * 1000,
+			refetchOnWindowFocus: false,
+		},
+	},
+});
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,10 +53,27 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+	return (
+		<QueryClientProvider client={queryClient}>
+			<Outlet />
+		</QueryClientProvider>
+	);
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+	if (isRouteErrorResponse(error)) {
+		if (error.status === 404) {
+			const url = typeof window !== "undefined" ? window.location.pathname : "";
+			if (
+				url.endsWith(".map") ||
+				url.endsWith(".js.map") ||
+				url.endsWith(".css.map")
+			) {
+				return null;
+			}
+		}
+	}
+
   let message = "Oops!";
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
